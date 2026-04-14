@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 	"queue/auth"
+
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load()
 	r := mux.NewRouter()
 	registerHealthHandler(r)
 	auth.RegisterHandlers(r)

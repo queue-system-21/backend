@@ -22,5 +22,5 @@ func registerHealthHandler(r *mux.Router) {
 	healthHandler := func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "The service is healthy")
 	}
-	s.HandleFunc("/", healthHandler).Methods("GET")
+	s.HandleFunc("/", healthHandler).Methods(http.MethodGet)
 }

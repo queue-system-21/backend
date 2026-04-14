@@ -42,8 +42,7 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := "insert into \"user\" (username, password) values (?, ?);"
-	fmt.Printf("username=%s, password=%s\n", dto.Username, dto.Password)
+	query := "insert into \"user\" (username, password) values ($1, $2);"
 	if _, err := db.Db().Exec(query, dto.Username, dto.Password); err != nil {
 		log.Println("Sign in error:", err)
 		http.Error(w, "Failed to create new user", 500)

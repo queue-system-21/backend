@@ -19,14 +19,13 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId, err := getUserId(dto.Username, dto.Password)
-	if err != nil {
+	if valid := validateCredentials(dto.Username, dto.Password); !valid {
 		log.Println("Sign in error:", err)
-		http.Error(w, "User not found", 404)
+		http.Error(w, "Credentials are invalid", 404)
 		return
 	}
 
-	jwt, err := createJwt(userId)
+	jwt, err := createJwt(dto.Username)
 	if err != nil {
 		log.Println("Sign in error:", err)
 		http.Error(w, "Failed to sign in", 500)

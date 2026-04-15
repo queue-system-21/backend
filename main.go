@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"queue/auth"
+	"queue/queue"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -14,6 +15,7 @@ func main() {
 	r := mux.NewRouter()
 	registerHealthHandler(r)
 	auth.RegisterHandlers(r)
+	queue.RegisterHandlers(r)
 	http.ListenAndServe(":8080", r)
 }
 

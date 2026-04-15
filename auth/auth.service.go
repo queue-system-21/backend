@@ -27,17 +27,22 @@ func createUser(username, password string) error {
 	return err
 }
 
-func getUserId(username, password string) (int, error) {
-	query := `select id from "user" where username = $1 and password = $2`
+func validateCredentials(username, password string) bool {
+	query := `select exists(select *
+              from "user"
+              where username = $1
+                and password = $2);`
 	row := db.Db().QueryRow(query, username, password)
-	var id int
-	err := row.Scan(&id)
-	return id, err
+	var exists bool
+	if err := row.Scan(&exists); err != nil {
+		return false
+	}
+	return exists
 }
 
-func createJwt(userId int) (string, error) {
+func createJwt(username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId": userId,
+		"username": username,
 	})
 	key := os.Getenv("JWT_SECRET")
 	return token.SignedString([]byte(key))

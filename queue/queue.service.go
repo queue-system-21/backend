@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"queue/db"
+	"queue/user"
 )
 
 type queue struct {
@@ -32,9 +33,24 @@ func getAll() ([]queue, error) {
 }
 
 func create(name, responsibleUserUsername string) error {
+	tx, err := db.Db().Begin()
+	if err != nil {
+		return err
+	}
+
 	query := `insert into queue (name, responsible_user_username) values ($1, $2)`
-	_, err := db.Db().Exec(query, name, responsibleUserUsername)
-	return err
+	_, err = tx.Exec(query, name, responsibleUserUsername)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err = user.SetRole(tx, responsibleUserUsername, "receptionist"); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func existsByUserName(username string) (bool, error) {

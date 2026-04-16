@@ -1,6 +1,9 @@
 package user
 
-import "queue/db"
+import (
+	"database/sql"
+	"queue/db"
+)
 
 func Create(username, password string) error {
 	query := "insert into \"user\" (username, password) values ($1, $2);"
@@ -19,4 +22,12 @@ func ValidateCredentials(username, password string) bool {
 		return false
 	}
 	return exists
+}
+
+func SetRole(tx *sql.Tx, username, code string) error {
+	query := `update "user"
+			set role_code = $2
+			where username = $1`
+	_, err := tx.Exec(query, username, code)
+	return err
 }

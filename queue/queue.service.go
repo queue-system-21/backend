@@ -58,3 +58,22 @@ func parseCreateDto(r *http.Request) (createDto, error) {
 	err := json.NewDecoder(r.Body).Decode(&dto)
 	return dto, err
 }
+
+type errNoQueueDeleted struct{}
+
+func (n errNoQueueDeleted) Error() string {
+	return "no queue was deleted"
+}
+
+func deleteById(id int) error {
+	query := "delete from queue where id = $1"
+	res, err := db.Db().Exec(query, id)
+	num, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if num == 0 {
+		return errNoQueueDeleted{}
+	}
+	return err
+}

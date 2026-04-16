@@ -2,9 +2,13 @@ package queue
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"queue/utils"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func list(w http.ResponseWriter, r *http.Request) {
@@ -51,4 +55,25 @@ func post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SendSuccessMsg(w, "successfully created a queue", 201)
+}
+
+func delete(w http.ResponseWriter, r *http.Request) {
+	pathVars := mux.Vars(r)
+	id, err := strconv.Atoi(pathVars["id"])
+	if err != nil {
+		log.Println("Error deleting a queue:", err)
+		utils.SendErrMsg(w, "Invalid queue id", 400)
+		return
+	}
+	if err = deleteById(id); err != nil {
+		if errors.As(err, &errNoQueueDeleted{}) {
+			utils.SendSuccessMsg(w, "No queue was deleted", 200)
+			return
+		}
+		log.Println("Error deleting a queue", err)
+		utils.SendErrMsg(w, "Error deleting a queue", 500)
+		return
+	}
+
+	utils.SendSuccessMsg(w, "Successfully deleted the queue", 200)
 }

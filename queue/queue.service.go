@@ -42,21 +42,6 @@ func (s *service) existsByUsername(username string) (bool, error) {
 	return s.repo.existsByUsername(username)
 }
 
-type errNoQueueDeleted struct{}
-
-func (n errNoQueueDeleted) Error() string {
-	return "no queue was deleted"
-}
-
-func deleteById(id int) error {
-	query := "delete from queue where id = $1"
-	res, err := db.Db().Exec(query, id)
-	num, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if num == 0 {
-		return errNoQueueDeleted{}
-	}
-	return err
+func (s *service) deleteById(id int) error {
+	return s.repo.deleteById(id)
 }

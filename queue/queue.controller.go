@@ -85,7 +85,17 @@ func (c *createHandler) parseRequest(r *http.Request) (createDto, error) {
 	return dto, err
 }
 
-func delete(w http.ResponseWriter, r *http.Request) {
+type deleteHandler struct {
+	service *service
+}
+
+func newDeleteHandler() *deleteHandler {
+	return &deleteHandler{
+		service: newService(),
+	}
+}
+
+func (d *deleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	pathVars := mux.Vars(r)
 	id, err := strconv.Atoi(pathVars["id"])
 	if err != nil {
@@ -93,7 +103,7 @@ func delete(w http.ResponseWriter, r *http.Request) {
 		utils.SendErrMsg(w, "Invalid queue id", 400)
 		return
 	}
-	if err = deleteById(id); err != nil {
+	if err = d.service.deleteById(id); err != nil {
 		if errors.As(err, &errNoQueueDeleted{}) {
 			utils.SendSuccessMsg(w, "No queue was deleted", 200)
 			return

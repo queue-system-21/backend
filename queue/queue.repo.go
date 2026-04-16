@@ -55,3 +55,22 @@ func (r *repo) existsByUsername(username string) (bool, error) {
 	err := row.Scan(&exists)
 	return exists, err
 }
+
+type errNoQueueDeleted struct{}
+
+func (n errNoQueueDeleted) Error() string {
+	return "no queue was deleted"
+}
+
+func (r *repo) deleteById(id int) error {
+	query := "delete from queue where id = $1"
+	res, err := db.Db().Exec(query, id)
+	num, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if num == 0 {
+		return errNoQueueDeleted{}
+	}
+	return err
+}

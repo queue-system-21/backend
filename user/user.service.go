@@ -5,7 +5,13 @@ import (
 	"queue/db"
 )
 
-func Create(username, password string) error {
+type Service struct{}
+
+func NewService() *Service {
+	return &Service{}
+}
+
+func (s *Service) Create(username, password string) error {
 	query := "insert into \"user\" (username, password) values ($1, $2);"
 	_, err := db.Db().Exec(query, username, password)
 	return err

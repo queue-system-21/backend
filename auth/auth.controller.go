@@ -65,13 +65,15 @@ func (h *signInHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type signUpHandler struct {
-	service *service
+	service     *service
+	userService *user.Service
 	*requestParser
 }
 
 func newSignUpHandler() http.Handler {
 	return &signUpHandler{
-		service: newService(),
+		service:     newService(),
+		userService: user.NewService(),
 	}
 }
 
@@ -83,7 +85,7 @@ func (h *signUpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = user.Create(dto.Username, dto.Username); err != nil {
+	if err = h.userService.Create(dto.Username, dto.Username); err != nil {
 		log.Println("Sign in error:", err)
 		utils.SendErrMsg(w, "Failed to create new user", 500)
 		return

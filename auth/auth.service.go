@@ -17,10 +17,12 @@ func newService() *service {
 	}
 }
 
-func (s *service) createJwt(username string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+func (s *service) createJwt(username, role string) (string, error) {
+	claims := jwt.MapClaims{
 		"username": username,
-	})
+		"role":     role,
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	key := os.Getenv("JWT_SECRET")
 	return token.SignedString([]byte(key))
 }
@@ -31,4 +33,8 @@ func (s *service) validateCredentials(username, password string) bool {
 
 func (s *service) createUser(username, password string) error {
 	return s.userService.Create(username, password)
+}
+
+func (s *service) getUserRole(username, password string) (string, error) {
+	return s.userService.GetRole(username, password)
 }

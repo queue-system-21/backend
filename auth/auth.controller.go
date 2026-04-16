@@ -44,12 +44,14 @@ func (h *signInHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if valid := h.service.validateCredentials(dto.Username, dto.Password); !valid {
+	role, err := h.service.getUserRole(dto.Username, dto.Password)
+	if err != nil {
+		log.Println("Sign in error:", err)
 		utils.SendErrMsg(w, "Credentials are invalid", 404)
 		return
 	}
 
-	jwt, err := h.service.createJwt(dto.Username)
+	jwt, err := h.service.createJwt(dto.Username, role)
 	if err != nil {
 		log.Println("Sign in error:", err)
 		utils.SendErrMsg(w, "Failed to sign in", 500)

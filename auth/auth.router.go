@@ -8,6 +8,6 @@ import (
 
 func RegisterHandlers(r *mux.Router) {
 	s := r.PathPrefix("/auth").Subrouter()
-	s.HandleFunc("/sign-in", signIn).Methods(http.MethodPost)
-	s.HandleFunc("/sign-up", signUp).Methods(http.MethodPost)
+	s.Handle("/sign-in", newSignInHandler()).Methods(http.MethodPost)
+	s.Handle("/sign-up", newSignUpHandler()).Methods(http.MethodPost)
 }

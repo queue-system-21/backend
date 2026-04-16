@@ -11,17 +11,24 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func list(w http.ResponseWriter, r *http.Request) {
-	queues, err := getAll()
+type getAllHandler struct {
+	service *service
+}
+
+func newGetAllHandler() *getAllHandler {
+	return &getAllHandler{
+		service: newService(),
+	}
+}
+
+func (g *getAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	queues, err := g.service.getAll()
 	if err != nil {
 		log.Println("Error in queue.list:", err)
 		utils.SendErrMsg(w, "Error getting all queues", 500)
 		return
 	}
 
-	if queues == nil {
-		queues = make([]queue, 0)
-	}
 	if err := json.NewEncoder(w).Encode(queues); err != nil {
 		log.Println("Error in queue.list:", err)
 		utils.SendErrMsg(w, "Error getting all queues", 500)
@@ -29,15 +36,25 @@ func list(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func post(w http.ResponseWriter, r *http.Request) {
-	dto, err := parseCreateDto(r)
+type createHandler struct {
+	service *service
+}
+
+func newCreateHandler() *createHandler {
+	return &createHandler{
+		service: newService(),
+	}
+}
+
+func (c *createHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	dto, err := c.parseRequest(r)
 	if err != nil {
 		log.Println("Error creating a queue:", err)
 		utils.SendErrMsg(w, "Failed to parse the input", 400)
 		return
 	}
 
-	exists, err := existsByUserName(dto.ResponsibleUserUsername)
+	exists, err := c.service.existsByUsername(dto.ResponsibleUserUsername)
 	if err != nil {
 		log.Println("Error creating a queue:", err)
 		utils.SendErrMsg(w, "Failed to create a queue", 500)
@@ -48,7 +65,7 @@ func post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = create(dto.Name, dto.ResponsibleUserUsername); err != nil {
+	if err = c.service.create(dto.Name, dto.ResponsibleUserUsername); err != nil {
 		log.Println("Error creating a queue:", err)
 		utils.SendErrMsg(w, "Failed to create a queue", 500)
 		return
@@ -57,7 +74,28 @@ func post(w http.ResponseWriter, r *http.Request) {
 	utils.SendSuccessMsg(w, "successfully created a queue", 201)
 }
 
-func delete(w http.ResponseWriter, r *http.Request) {
+type createDto struct {
+	Name                    string `json:"name"`
+	ResponsibleUserUsername string `json:"responsibleUserUsername"`
+}
+
+func (c *createHandler) parseRequest(r *http.Request) (createDto, error) {
+	var dto createDto
+	err := json.NewDecoder(r.Body).Decode(&dto)
+	return dto, err
+}
+
+type deleteHandler struct {
+	service *service
+}
+
+func newDeleteHandler() *deleteHandler {
+	return &deleteHandler{
+		service: newService(),
+	}
+}
+
+func (d *deleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	pathVars := mux.Vars(r)
 	id, err := strconv.Atoi(pathVars["id"])
 	if err != nil {
@@ -65,7 +103,7 @@ func delete(w http.ResponseWriter, r *http.Request) {
 		utils.SendErrMsg(w, "Invalid queue id", 400)
 		return
 	}
-	if err = deleteById(id); err != nil {
+	if err = d.service.deleteById(id); err != nil {
 		if errors.As(err, &errNoQueueDeleted{}) {
 			utils.SendSuccessMsg(w, "No queue was deleted", 200)
 			return

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"queue/user"
 	"queue/utils"
 )
 
@@ -19,7 +20,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if valid := validateCredentials(dto.Username, dto.Password); !valid {
+	if valid := user.ValidateCredentials(dto.Username, dto.Password); !valid {
 		log.Println("Sign in error:", err)
 		utils.SendErrMsg(w, "Credentials are invalid", 404)
 		return
@@ -47,7 +48,7 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = createUser(dto.Username, dto.Username); err != nil {
+	if err = user.Create(dto.Username, dto.Username); err != nil {
 		log.Println("Sign in error:", err)
 		utils.SendErrMsg(w, "Failed to create new user", 500)
 		return

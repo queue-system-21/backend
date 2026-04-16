@@ -2,9 +2,9 @@ package auth
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"queue/utils"
 )
 
 type signInResponse struct {
@@ -15,26 +15,26 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 	dto, err := parseDto(r)
 	if err != nil {
 		log.Println("Sign in error:", err)
-		http.Error(w, "Invalid request body", 400)
+		utils.SendErrMsg(w, "Invalid request body", 400)
 		return
 	}
 
 	if valid := validateCredentials(dto.Username, dto.Password); !valid {
 		log.Println("Sign in error:", err)
-		http.Error(w, "Credentials are invalid", 404)
+		utils.SendErrMsg(w, "Credentials are invalid", 404)
 		return
 	}
 
 	jwt, err := createJwt(dto.Username)
 	if err != nil {
 		log.Println("Sign in error:", err)
-		http.Error(w, "Failed to sign in", 500)
+		utils.SendErrMsg(w, "Failed to sign in", 500)
 		return
 	}
 
 	if err = json.NewEncoder(w).Encode(signInResponse{Token: jwt}); err != nil {
 		log.Println("Sign in error:", err)
-		http.Error(w, "Internal server error", 500)
+		utils.SendErrMsg(w, "Internal server error", 500)
 		return
 	}
 }
@@ -43,16 +43,15 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 	dto, err := parseDto(r)
 	if err != nil {
 		log.Println("Sign up error:", err)
-		http.Error(w, "Invalid request body", 400)
+		utils.SendErrMsg(w, "Invalid request body", 400)
 		return
 	}
 
 	if err = createUser(dto.Username, dto.Username); err != nil {
 		log.Println("Sign in error:", err)
-		http.Error(w, "Failed to create new user", 500)
+		utils.SendErrMsg(w, "Failed to create new user", 500)
 		return
 	}
 
-	w.WriteHeader(201)
-	fmt.Fprintln(w, "User created successfully!")
+	utils.SendSuccessMsg(w, "User created successfully!", 201)
 }

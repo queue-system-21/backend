@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"queue/utils"
 )
 
 func list(w http.ResponseWriter, r *http.Request) {
 	queues, err := getAll()
 	if err != nil {
 		log.Println("Error in queue.list:", err)
-		http.Error(w, "Error getting all queues", 500)
+		utils.SendErrMsg(w, "Error getting all queues", 500)
 		return
 	}
 
@@ -19,7 +20,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewEncoder(w).Encode(queues); err != nil {
 		log.Println("Error in queue.list:", err)
-		http.Error(w, "Error getting all queues", 500)
+		utils.SendErrMsg(w, "Error getting all queues", 500)
 		return
 	}
 }
@@ -28,30 +29,26 @@ func post(w http.ResponseWriter, r *http.Request) {
 	dto, err := parseCreateDto(r)
 	if err != nil {
 		log.Println("Error creating a queue:", err)
-		http.Error(w, "Failed to parse the input", 400)
+		utils.SendErrMsg(w, "Failed to parse the input", 400)
 		return
 	}
 
 	exists, err := existsByUserName(dto.ResponsibleUserUsername)
 	if err != nil {
 		log.Println("Error creating a queue:", err)
-		http.Error(w, "Failed to create a queue", 500)
+		utils.SendErrMsg(w, "Failed to create a queue", 500)
 		return
 	}
 	if exists {
-		http.Error(w, "You cannot assign this user for this queue", 400)
+		utils.SendErrMsg(w, "You cannot assign this user for this queue", 400)
 		return
 	}
 
 	if err = create(dto.Name, dto.ResponsibleUserUsername); err != nil {
 		log.Println("Error creating a queue:", err)
-		http.Error(w, "Failed to create a queue", 500)
+		utils.SendErrMsg(w, "Failed to create a queue", 500)
 		return
 	}
 
-	json.NewEncoder(w).Encode(
-		map[string]string{
-			"message": "successfully create a queue",
-		},
-	)
+	utils.SendSuccessMsg(w, "successfully created a queue", 201)
 }

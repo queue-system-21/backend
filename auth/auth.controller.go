@@ -8,12 +8,37 @@ import (
 	"queue/utils"
 )
 
+type requestParser struct{}
+
+type authDto struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func (rp *requestParser) parseDto(r *http.Request) (authDto, error) {
+	var dto authDto
+	defer r.Body.Close()
+	err := json.NewDecoder(r.Body).Decode(&dto)
+	return dto, err
+}
+
+type signInHandler struct {
+	service *service
+	*requestParser
+}
+
+func newSignInHandler() http.Handler {
+	return &signInHandler{
+		service: newService(),
+	}
+}
+
 type signInResponse struct {
 	Token string `json:"token"`
 }
 
-func signIn(w http.ResponseWriter, r *http.Request) {
-	dto, err := parseDto(r)
+func (h *signInHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	dto, err := h.parseDto(r)
 	if err != nil {
 		log.Println("Sign in error:", err)
 		utils.SendErrMsg(w, "Invalid request body", 400)
@@ -25,7 +50,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jwt, err := createJwt(dto.Username)
+	jwt, err := h.service.createJwt(dto.Username)
 	if err != nil {
 		log.Println("Sign in error:", err)
 		utils.SendErrMsg(w, "Failed to sign in", 500)
@@ -39,8 +64,19 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func signUp(w http.ResponseWriter, r *http.Request) {
-	dto, err := parseDto(r)
+type signUpHandler struct {
+	service *service
+	*requestParser
+}
+
+func newSignUpHandler() http.Handler {
+	return &signUpHandler{
+		service: newService(),
+	}
+}
+
+func (h *signUpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	dto, err := h.parseDto(r)
 	if err != nil {
 		log.Println("Sign up error:", err)
 		utils.SendErrMsg(w, "Invalid request body", 400)

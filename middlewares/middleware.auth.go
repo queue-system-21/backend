@@ -26,12 +26,14 @@ func (a *authMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		utils.SendErrMsg(w, "Unauthorized", 401)
 		return
 	}
+
 	authHeaderValue := authHeader[0]
 	splitAuthHeaderVal := strings.Split(authHeaderValue, " ")
 	if len(splitAuthHeaderVal) < 2 {
 		utils.SendErrMsg(w, "Unauthorized", 401)
 		return
 	}
+
 	tokenStr := splitAuthHeaderVal[1]
 	option := jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()})
 	token, err := jwt.Parse(tokenStr, a.keyFunc, option)
@@ -39,7 +41,10 @@ func (a *authMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		utils.SendErrMsg(w, "Unauthorized", 401)
 		return
 	}
-	ctx := context.WithValue(r.Context(), "username", token.Claims.(jwt.MapClaims)["username"])
+
+	claims := token.Claims.(jwt.MapClaims)
+	ctx := context.WithValue(r.Context(), "username", claims["username"])
+	ctx = context.WithValue(r.Context(), "role", claims["role"])
 	r = r.WithContext(ctx)
 	a.next.ServeHTTP(w, r)
 }

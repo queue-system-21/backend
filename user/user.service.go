@@ -17,7 +17,7 @@ func (s *Service) Create(username, password string) error {
 	return err
 }
 
-func ValidateCredentials(username, password string) bool {
+func (s *Service) ValidateCredentials(username, password string) bool {
 	query := `select exists(select *
               from "user"
               where username = $1

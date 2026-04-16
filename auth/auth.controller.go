@@ -23,13 +23,15 @@ func (rp *requestParser) parseDto(r *http.Request) (authDto, error) {
 }
 
 type signInHandler struct {
-	service *service
+	service     *service
+	userService user.Service
 	*requestParser
 }
 
 func newSignInHandler() http.Handler {
 	return &signInHandler{
-		service: newService(),
+		service:     newService(),
+		userService: *user.NewService(),
 	}
 }
 
@@ -45,7 +47,7 @@ func (h *signInHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if valid := user.ValidateCredentials(dto.Username, dto.Password); !valid {
+	if valid := h.userService.ValidateCredentials(dto.Username, dto.Password); !valid {
 		utils.SendErrMsg(w, "Credentials are invalid", 404)
 		return
 	}

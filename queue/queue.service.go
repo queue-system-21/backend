@@ -1,46 +1,31 @@
 package queue
 
 import (
-	"encoding/json"
-	"log"
-	"net/http"
 	"queue/db"
 	"queue/user"
 )
 
-type queue struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+type service struct {
+	repo *repo
 }
 
-func getAll() ([]queue, error) {
-	query := "select id, name from queue"
-	rows, err := db.Db().Query(query)
-	if err != nil {
-		return nil, err
+func newService() *service {
+	return &service{
+		repo: newRepo(),
 	}
-
-	var queues []queue
-	for rows.Next() {
-		var q queue
-		if err = rows.Scan(&q.Id, &q.Name); err != nil {
-			log.Println("Error in queue.getAll:", err)
-			continue
-		}
-		queues = append(queues, q)
-	}
-	return queues, nil
 }
 
-func create(name, responsibleUserUsername string) error {
+func (s *service) getAll() ([]queue, error) {
+	return s.repo.getAll()
+}
+
+func (s *service) create(name, responsibleUserUsername string) error {
 	tx, err := db.Db().Begin()
 	if err != nil {
 		return err
 	}
 
-	query := `insert into queue (name, responsible_user_username) values ($1, $2)`
-	_, err = tx.Exec(query, name, responsibleUserUsername)
-	if err != nil {
+	if err = s.repo.create(tx, name, responsibleUserUsername); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -53,26 +38,8 @@ func create(name, responsibleUserUsername string) error {
 	return tx.Commit()
 }
 
-func existsByUserName(username string) (bool, error) {
-	query := `select exists(select id
-              from queue
-              where responsible_user_username = $1)`
-
-	row := db.Db().QueryRow(query, username)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
-}
-
-type createDto struct {
-	Name                    string `json:"name"`
-	ResponsibleUserUsername string `json:"responsibleUserUsername"`
-}
-
-func parseCreateDto(r *http.Request) (createDto, error) {
-	var dto createDto
-	err := json.NewDecoder(r.Body).Decode(&dto)
-	return dto, err
+func (s *service) existsByUsername(username string) (bool, error) {
+	return s.repo.existsByUsername(username)
 }
 
 type errNoQueueDeleted struct{}

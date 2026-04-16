@@ -2,6 +2,7 @@ package queue
 
 import (
 	"net/http"
+	"queue/middlewares"
 
 	"github.com/gorilla/mux"
 )
@@ -11,4 +12,5 @@ func RegisterHandlers(r *mux.Router) {
 	s.Handle("/", newGetAllHandler()).Methods(http.MethodGet)
 	s.Handle("/", newCreateHandler()).Methods(http.MethodPost)
 	s.Handle("/{id:[0-9]+}", newDeleteHandler()).Methods(http.MethodDelete)
+	s.Use(middlewares.NewAuthMiddleware)
 }

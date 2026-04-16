@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"queue/user"
 	"queue/utils"
 )
 
@@ -23,15 +22,13 @@ func (rp *requestParser) parseDto(r *http.Request) (authDto, error) {
 }
 
 type signInHandler struct {
-	service     *service
-	userService user.Service
+	service *service
 	*requestParser
 }
 
 func newSignInHandler() http.Handler {
 	return &signInHandler{
-		service:     newService(),
-		userService: *user.NewService(),
+		service: newService(),
 	}
 }
 
@@ -47,7 +44,7 @@ func (h *signInHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if valid := h.userService.ValidateCredentials(dto.Username, dto.Password); !valid {
+	if valid := h.service.validateCredentials(dto.Username, dto.Password); !valid {
 		utils.SendErrMsg(w, "Credentials are invalid", 404)
 		return
 	}
@@ -67,15 +64,13 @@ func (h *signInHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type signUpHandler struct {
-	service     *service
-	userService *user.Service
+	service *service
 	*requestParser
 }
 
 func newSignUpHandler() http.Handler {
 	return &signUpHandler{
-		service:     newService(),
-		userService: user.NewService(),
+		service: newService(),
 	}
 }
 
@@ -87,7 +82,7 @@ func (h *signUpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = h.userService.Create(dto.Username, dto.Username); err != nil {
+	if err = h.service.createUser(dto.Username, dto.Username); err != nil {
 		log.Println("Sign in error:", err)
 		utils.SendErrMsg(w, "Failed to create new user", 500)
 		return

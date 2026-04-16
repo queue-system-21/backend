@@ -30,7 +30,7 @@ func (s *Service) ValidateCredentials(username, password string) bool {
 	return exists
 }
 
-func SetRole(tx *sql.Tx, username, code string) error {
+func (s *Service) SetRole(tx *sql.Tx, username, code string) error {
 	query := `update "user"
 			set role_code = $2
 			where username = $1`

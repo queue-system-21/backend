@@ -6,12 +6,14 @@ import (
 )
 
 type service struct {
-	repo *repo
+	repo        *repo
+	userService *user.Service
 }
 
 func newService() *service {
 	return &service{
-		repo: newRepo(),
+		repo:        newRepo(),
+		userService: user.NewService(),
 	}
 }
 
@@ -30,7 +32,7 @@ func (s *service) create(name, responsibleUserUsername string) error {
 		return err
 	}
 
-	if err = user.SetRole(tx, responsibleUserUsername, "receptionist"); err != nil {
+	if err = s.userService.SetRole(tx, responsibleUserUsername, "receptionist"); err != nil {
 		tx.Rollback()
 		return err
 	}

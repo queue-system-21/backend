@@ -2,6 +2,7 @@ package queue
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"queue/db"
 )
@@ -58,21 +59,18 @@ func (r *repo) existsByUsername(username string) (bool, error) {
 	return exists, err
 }
 
-type errNoQueueDeleted struct{}
+var errNoQueueDeleted = errors.New("no queue was deleted")
 
-func (n errNoQueueDeleted) Error() string {
-	return "no queue was deleted"
-}
-
-func (r *repo) deleteById(id int) error {
-	query := "delete from queue where id = $1"
-	res, err := db.Db().Exec(query, id)
-	num, err := res.RowsAffected()
-	if err != nil {
-		return err
+func (r *repo) deleteById(tx *sql.Tx, id int) (string, error) {
+	query := `delete
+			  from queue
+			  where id = $1
+			  returning responsible_user_username`
+	row := tx.QueryRow(query, id)
+	var username string
+	err := row.Scan(&username)
+	if err == sql.ErrNoRows {
+		return "", errNoQueueDeleted
 	}
-	if num == 0 {
-		return errNoQueueDeleted{}
-	}
-	return err
+	return username, err
 }

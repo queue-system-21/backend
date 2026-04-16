@@ -2,7 +2,6 @@ package queue
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 	"queue/utils"
@@ -106,7 +105,7 @@ func (h *deleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err = h.service.deleteById(id); err != nil {
-		if errors.As(err, &errNoQueueDeleted{}) {
+		if err == errNoQueueDeleted {
 			utils.SendSuccessMsg(w, "No queue was deleted", 200)
 			return
 		}

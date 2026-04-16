@@ -47,5 +47,21 @@ func (s *service) existsByUsername(username string) (bool, error) {
 }
 
 func (s *service) deleteById(id int) error {
-	return s.repo.deleteById(id)
+	tx, err := db.Db().Begin()
+	if err != nil {
+		return err
+	}
+
+	username, err := s.repo.deleteById(tx, id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err = s.userService.SetRole(tx, username, "user"); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }

@@ -21,18 +21,20 @@ func (s *service) getAll() ([]queue, error) {
 	return s.repo.getAll()
 }
 
-func (s *service) create(name, responsibleUserUsername string) error {
+func (s *service) create(nameRus, nameKaz, responsibleUserUsername string) error {
 	tx, err := db.Db().Begin()
 	if err != nil {
 		return err
 	}
 
-	if err = s.repo.create(tx, name, responsibleUserUsername); err != nil {
+	err = s.repo.create(tx, nameRus, nameKaz, responsibleUserUsername)
+	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err = s.userService.SetRole(tx, responsibleUserUsername, "receptionist"); err != nil {
+	err = s.userService.SetRole(tx, responsibleUserUsername, "receptionist")
+	if err != nil {
 		tx.Rollback()
 		return err
 	}

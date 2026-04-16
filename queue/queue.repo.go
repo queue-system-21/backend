@@ -7,8 +7,9 @@ import (
 )
 
 type queue struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	Id      int    `json:"id"`
+	NameRus string `json:"nameRus"`
+	NameKaz string `json:"nameKaz"`
 }
 
 type repo struct{}
@@ -18,7 +19,7 @@ func newRepo() *repo {
 }
 
 func (r *repo) getAll() ([]queue, error) {
-	query := "select id, name from queue"
+	query := "select id, name_rus, name_kaz from queue"
 	rows, err := db.Db().Query(query)
 	if err != nil {
 		return nil, err
@@ -27,7 +28,7 @@ func (r *repo) getAll() ([]queue, error) {
 	var queues []queue
 	for rows.Next() {
 		var q queue
-		if err = rows.Scan(&q.Id, &q.Name); err != nil {
+		if err = rows.Scan(&q.Id, &q.NameRus, &q.NameKaz); err != nil {
 			log.Println("Error in queue.getAll:", err)
 			continue
 		}
@@ -39,9 +40,10 @@ func (r *repo) getAll() ([]queue, error) {
 	return queues, nil
 }
 
-func (r *repo) create(tx *sql.Tx, name, responsibleUserUsername string) error {
-	query := `insert into queue (name, responsible_user_username) values ($1, $2)`
-	_, err := tx.Exec(query, name, responsibleUserUsername)
+func (r *repo) create(tx *sql.Tx, nameRus, nameKaz, responsibleUserUsername string) error {
+	query := `insert into queue (name_rus, name_kaz, responsible_user_username)
+			  values ($1, $2, $3)`
+	_, err := tx.Exec(query, nameRus, nameKaz, responsibleUserUsername)
 	return err
 }
 

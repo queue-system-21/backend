@@ -65,7 +65,8 @@ func (h *createHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = h.service.create(dto.Name, dto.ResponsibleUserUsername); err != nil {
+	err = h.service.create(dto.NameRus, dto.NameKaz, dto.ResponsibleUserUsername)
+	if err != nil {
 		log.Println("Error creating a queue:", err)
 		utils.SendErrMsg(w, "Failed to create a queue", 500)
 		return
@@ -75,7 +76,8 @@ func (h *createHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type createDto struct {
-	Name                    string `json:"name"`
+	NameRus                 string `json:"nameRus"`
+	NameKaz                 string `json:"nameKaz"`
 	ResponsibleUserUsername string `json:"responsibleUserUsername"`
 }
 

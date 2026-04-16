@@ -15,14 +15,14 @@ type getAllHandler struct {
 	service *service
 }
 
-func newGetAllHandler() *getAllHandler {
+func newGetAllHandler() http.Handler {
 	return &getAllHandler{
 		service: newService(),
 	}
 }
 
-func (g *getAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	queues, err := g.service.getAll()
+func (h *getAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	queues, err := h.service.getAll()
 	if err != nil {
 		log.Println("Error in queue.list:", err)
 		utils.SendErrMsg(w, "Error getting all queues", 500)
@@ -40,21 +40,21 @@ type createHandler struct {
 	service *service
 }
 
-func newCreateHandler() *createHandler {
+func newCreateHandler() http.Handler {
 	return &createHandler{
 		service: newService(),
 	}
 }
 
-func (c *createHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	dto, err := c.parseRequest(r)
+func (h *createHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	dto, err := h.parseRequest(r)
 	if err != nil {
 		log.Println("Error creating a queue:", err)
 		utils.SendErrMsg(w, "Failed to parse the input", 400)
 		return
 	}
 
-	exists, err := c.service.existsByUsername(dto.ResponsibleUserUsername)
+	exists, err := h.service.existsByUsername(dto.ResponsibleUserUsername)
 	if err != nil {
 		log.Println("Error creating a queue:", err)
 		utils.SendErrMsg(w, "Failed to create a queue", 500)
@@ -65,7 +65,7 @@ func (c *createHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = c.service.create(dto.Name, dto.ResponsibleUserUsername); err != nil {
+	if err = h.service.create(dto.Name, dto.ResponsibleUserUsername); err != nil {
 		log.Println("Error creating a queue:", err)
 		utils.SendErrMsg(w, "Failed to create a queue", 500)
 		return
@@ -79,7 +79,7 @@ type createDto struct {
 	ResponsibleUserUsername string `json:"responsibleUserUsername"`
 }
 
-func (c *createHandler) parseRequest(r *http.Request) (createDto, error) {
+func (h *createHandler) parseRequest(r *http.Request) (createDto, error) {
 	var dto createDto
 	err := json.NewDecoder(r.Body).Decode(&dto)
 	return dto, err
@@ -89,13 +89,13 @@ type deleteHandler struct {
 	service *service
 }
 
-func newDeleteHandler() *deleteHandler {
+func newDeleteHandler() http.Handler {
 	return &deleteHandler{
 		service: newService(),
 	}
 }
 
-func (d *deleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *deleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	pathVars := mux.Vars(r)
 	id, err := strconv.Atoi(pathVars["id"])
 	if err != nil {
@@ -103,7 +103,7 @@ func (d *deleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		utils.SendErrMsg(w, "Invalid queue id", 400)
 		return
 	}
-	if err = d.service.deleteById(id); err != nil {
+	if err = h.service.deleteById(id); err != nil {
 		if errors.As(err, &errNoQueueDeleted{}) {
 			utils.SendSuccessMsg(w, "No queue was deleted", 200)
 			return

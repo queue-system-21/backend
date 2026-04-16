@@ -36,5 +36,5 @@ func (s *service) createUser(username, password string) error {
 }
 
 func (s *service) getUserRole(username, password string) (string, error) {
-	return s.userService.GetRole(username, password)
+	return s.userService.GetRoleByUsernameAndPassword(username, password)
 }

@@ -36,13 +36,23 @@ func (r *repo) setRole(tx *sql.Tx, username, code string) error {
 	return err
 }
 
-func (r *repo) getRole(username, password string) (string, error) {
+func (r *repo) getRoleByUsernameAndPassword(username, password string) (string, error) {
 	query := `select role_code
 			  from "user"
 			  where username = $1
 				and password = $2`
 	var role string
 	row := db.Db().QueryRow(query, username, password)
+	err := row.Scan(&role)
+	return role, err
+}
+
+func (r *repo) getRoleByUsername(username string) (string, error) {
+	query := `select role_code
+			  from "user"
+			  where username = $1`
+	var role string
+	row := db.Db().QueryRow(query, username)
 	err := row.Scan(&role)
 	return role, err
 }

@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"errors"
 	"queue/db"
 	"queue/user"
 )
@@ -42,8 +43,36 @@ func (s *service) create(nameRus, nameKaz, responsibleUserUsername string) error
 	return tx.Commit()
 }
 
-func (s *service) existsByUsername(username string) (bool, error) {
-	return s.repo.existsByUsername(username)
+var errUserBusy = errors.New("You cannot assign this user for this queue")
+var errNameRusNotUnique = errors.New("nameRus is not unique")
+var errNameKazNotUnique = errors.New("nameKaz is not unique")
+
+func (s *service) existsBy(username, nameRus, nameKaz string) error {
+	exists, err := s.repo.existsByUsername(username)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return errUserBusy
+	}
+
+	exists, err = s.repo.existsByNameRus(nameRus)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return errNameRusNotUnique
+	}
+
+	exists, err = s.repo.existsByNameKaz(nameKaz)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return errNameKazNotUnique
+	}
+
+	return nil
 }
 
 func (s *service) deleteById(id int) error {
@@ -64,4 +93,8 @@ func (s *service) deleteById(id int) error {
 	}
 
 	return tx.Commit()
+}
+
+func (s *service) getUserRole(username string) (string, error) {
+	return s.userService.GetRoleByUsername(username)
 }

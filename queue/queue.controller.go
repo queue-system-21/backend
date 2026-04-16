@@ -53,14 +53,30 @@ func (h *createHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exists, err := h.service.existsByUsername(dto.ResponsibleUserUsername)
+	role, err := h.service.getUserRole(dto.ResponsibleUserUsername)
 	if err != nil {
 		log.Println("Error creating a queue:", err)
-		utils.SendErrMsg(w, "Failed to create a queue", 500)
+		utils.SendErrMsg(w, "Failed to check assigned user role", 500)
 		return
 	}
-	if exists {
-		utils.SendErrMsg(w, "You cannot assign this user for this queue", 400)
+	if role == "admin" {
+		utils.SendErrMsg(w, "Cannot assign an admin", 400)
+		return
+	}
+
+	err = h.service.existsBy(dto.ResponsibleUserUsername, dto.NameRus, dto.NameKaz)
+	if err != nil {
+		switch err {
+		case errUserBusy:
+			utils.SendErrMsg(w, "User is already assgined a queue", 400)
+		case errNameRusNotUnique:
+			utils.SendErrMsg(w, "nameRus is not unique", 400)
+		case errNameKazNotUnique:
+			utils.SendErrMsg(w, "nameKaz is not unique", 400)
+		default:
+			log.Println("Error creating a queue:", err)
+			utils.SendErrMsg(w, "Failed to create a queue", 500)
+		}
 		return
 	}
 

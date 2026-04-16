@@ -3,6 +3,7 @@ package queue
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"queue/db"
 )
@@ -49,11 +50,23 @@ func (r *repo) create(tx *sql.Tx, nameRus, nameKaz, responsibleUserUsername stri
 }
 
 func (r *repo) existsByUsername(username string) (bool, error) {
-	query := `select exists(select id
-              from queue
-              where responsible_user_username = $1)`
+	return r.existsBy("responsible_user_username", username)
+}
 
-	row := db.Db().QueryRow(query, username)
+func (r *repo) existsByNameRus(nameRus string) (bool, error) {
+	return r.existsBy("name_rus", nameRus)
+}
+
+func (r *repo) existsByNameKaz(nameKaz string) (bool, error) {
+	return r.existsBy("name_kaz", nameKaz)
+}
+
+func (r *repo) existsBy(column, value string) (bool, error) {
+	query := fmt.Sprintf(`select exists(select id
+              							from queue
+              							where %s = $1)`, column)
+
+	row := db.Db().QueryRow(query, value)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err

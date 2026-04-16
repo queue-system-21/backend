@@ -21,7 +21,6 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if valid := user.ValidateCredentials(dto.Username, dto.Password); !valid {
-		log.Println("Sign in error:", err)
 		utils.SendErrMsg(w, "Credentials are invalid", 404)
 		return
 	}

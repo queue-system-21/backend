@@ -9,8 +9,8 @@ import (
 
 func RegisterHandlers(r *mux.Router) {
 	s := r.PathPrefix("/queue").Subrouter()
-	s.Handle("/", middlewares.NewRole([]string{"user", "admin"}, newGetAllHandler())).Methods(http.MethodGet)
-	s.Handle("/", middlewares.NewRole([]string{"admin"}, newCreateHandler())).Methods(http.MethodPost)
+	s.Handle("", middlewares.NewRole([]string{"user", "admin"}, newGetAllHandler())).Methods(http.MethodGet)
+	s.Handle("", middlewares.NewRole([]string{"admin"}, newCreateHandler())).Methods(http.MethodPost)
 	s.Handle("/{id:[0-9]+}", middlewares.NewRole([]string{"admin"}, newDeleteHandler())).Methods(http.MethodDelete)
 	s.Use(middlewares.NewAuthMiddleware)
 }

@@ -15,11 +15,19 @@ func NewService() *Service {
 }
 
 func (s *Service) Create(username, password string) error {
-	return s.repo.create(username, password)
+	user := User{
+		Username: username,
+		Password: password,
+	}
+	return s.repo.save(&user)
 }
 
 func (s *Service) ValidateCredentials(username, password string) bool {
-	exists, err := s.repo.exists(username, password)
+	user := User{
+		Username: username,
+		Password: password,
+	}
+	exists, err := s.repo.exists(&user)
 	if err != nil {
 		return false
 	}
@@ -27,13 +35,13 @@ func (s *Service) ValidateCredentials(username, password string) bool {
 }
 
 func (s *Service) SetRole(tx *sql.Tx, username, code string) error {
-	return s.repo.setRole(tx, username, code)
+	user := User{
+		Username: username,
+		RoleCode: code,
+	}
+	return s.repo.updateRole(tx, &user)
 }
 
 func (s *Service) GetRoleByUsername(username string) (string, error) {
 	return s.repo.getRoleByUsername(username)
-}
-
-func (s *Service) GetRoleByUsernameAndPassword(username, password string) (string, error) {
-	return s.repo.getRoleByUsernameAndPassword(username, password)
 }

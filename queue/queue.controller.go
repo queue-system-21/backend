@@ -168,3 +168,30 @@ func (h *joinHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	utils.SendSuccessMsg(w, "Successfully joined the queue", 200)
 }
+
+type getNumberHandler struct {
+	service *service
+}
+
+func newGetNumberHandler() http.Handler {
+	return &getNumberHandler{
+		service: newService(),
+	}
+}
+
+func (h *getNumberHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value("username").(string)
+	num, err := h.service.getQueueNumber(username)
+	if err != nil {
+		log.Println("Error getting queue number:", err)
+		utils.SendErrMsg(w, "Failed to get queue number", 500)
+		return
+	}
+
+	dto := getNumberDto{Number: num}
+	if err := json.NewEncoder(w).Encode(dto); err != nil {
+		log.Println("Error encoding number:", err)
+		utils.SendErrMsg(w, "Failed to encode response", 500)
+		return
+	}
+}

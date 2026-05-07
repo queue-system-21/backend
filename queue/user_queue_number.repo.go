@@ -13,3 +13,19 @@ func (r *userQueueNumberRepo) save(uqn *userQueueNumber) error {
 	_, err := db.Db().Exec(query, uqn.Username, uqn.QueueId)
 	return err
 }
+
+func (r *userQueueNumberRepo) getNumber(username string) (int, error) {
+	query := `select num
+			  from (select username, row_number() over () num
+				    from user_queue_number
+				    where queue_id = (select queue_id
+									  from user_queue_number
+									  where username = $1)
+				    order by id) t
+			  where username = $1`
+	var num int
+	row := db.Db().QueryRow(query, username)
+	err := row.Scan(&num)
+	return num, err
+
+}

@@ -112,3 +112,7 @@ func (s *service) join(username string, queueId int) error {
 	}
 	return s.userQueueNumberRepo.save(&uqn)
 }
+
+func (s *service) getQueueNumber(username string) (int, error) {
+	return s.userQueueNumberRepo.getNumber(username)
+}

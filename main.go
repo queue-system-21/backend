@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"queue/auth"
 	"queue/queue"
 
@@ -16,7 +18,9 @@ func main() {
 	registerHealthHandler(r)
 	auth.RegisterHandlers(r)
 	queue.RegisterHandlers(r)
-	http.ListenAndServe(":8080", r)
+	port := os.Getenv("PORT")
+	log.Println("Starting the server on port:", port)
+	http.ListenAndServe(":"+port, r)
 }
 
 func registerHealthHandler(r *mux.Router) {

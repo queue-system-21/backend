@@ -6,6 +6,10 @@ import (
 	"queue/user"
 )
 
+var errUserBusy = errors.New("You cannot assign this user for this queue")
+var errNameRusNotUnique = errors.New("nameRus is not unique")
+var errNameKazNotUnique = errors.New("nameKaz is not unique")
+
 type service struct {
 	repo        *repo
 	userService *user.Service
@@ -28,8 +32,12 @@ func (s *service) create(nameRus, nameKaz, responsibleUserUsername string) error
 		return err
 	}
 
-	err = s.repo.create(tx, nameRus, nameKaz, responsibleUserUsername)
-	if err != nil {
+	q := queue{
+		NameRus:                 nameRus,
+		NameKaz:                 nameKaz,
+		ResponsibleUserUsername: responsibleUserUsername,
+	}
+	if err = s.repo.create(tx, &q); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -42,10 +50,6 @@ func (s *service) create(nameRus, nameKaz, responsibleUserUsername string) error
 
 	return tx.Commit()
 }
-
-var errUserBusy = errors.New("You cannot assign this user for this queue")
-var errNameRusNotUnique = errors.New("nameRus is not unique")
-var errNameKazNotUnique = errors.New("nameKaz is not unique")
 
 func (s *service) existsBy(username, nameRus, nameKaz string) error {
 	exists, err := s.repo.existsByUsername(username)

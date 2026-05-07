@@ -5,3 +5,9 @@ type getDto struct {
 	NameRus string `json:"nameRus"`
 	NameKaz string `json:"nameKaz"`
 }
+
+type createDto struct {
+	NameRus                 string `json:"nameRus"`
+	NameKaz                 string `json:"nameKaz"`
+	ResponsibleUserUsername string `json:"responsibleUserUsername"`
+}

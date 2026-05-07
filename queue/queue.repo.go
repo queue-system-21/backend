@@ -37,10 +37,10 @@ func (r *repo) getAll() ([]queue, error) {
 	return queues, nil
 }
 
-func (r *repo) create(tx *sql.Tx, nameRus, nameKaz, responsibleUserUsername string) error {
+func (r *repo) create(tx *sql.Tx, q *queue) error {
 	query := `insert into queue (name_rus, name_kaz, responsible_user_username)
 			  values ($1, $2, $3)`
-	_, err := tx.Exec(query, nameRus, nameKaz, responsibleUserUsername)
+	_, err := tx.Exec(query, q.NameRus, q.NameKaz, q.ResponsibleUserUsername)
 	return err
 }
 

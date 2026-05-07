@@ -103,12 +103,6 @@ func (h *createHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	utils.SendSuccessMsg(w, "successfully created a queue", 201)
 }
 
-type createDto struct {
-	NameRus                 string `json:"nameRus"`
-	NameKaz                 string `json:"nameKaz"`
-	ResponsibleUserUsername string `json:"responsibleUserUsername"`
-}
-
 func (h *createHandler) parseRequest(r *http.Request) (createDto, error) {
 	var dto createDto
 	err := json.NewDecoder(r.Body).Decode(&dto)

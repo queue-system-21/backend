@@ -14,19 +14,12 @@ func (r *userQueueNumberRepo) save(uqn *userQueueNumber) error {
 	return err
 }
 
-func (r *userQueueNumberRepo) getNumber(username string) (int, error) {
-	query := `select num
-			  from (select username, row_number() over () num
-				    from user_queue_number
-				    where queue_id = (select queue_id
-									  from user_queue_number
-									  where username = $1)
-				    order by id) t
-			  where username = $1`
-	var num int
+func (r *userQueueNumberRepo) getByUsername(username string) (*userQueueNumber, error) {
+	query := "select id, username, queue_id, number from user_queue_number where username = $1"
+	var uqn userQueueNumber
 	row := db.Db().QueryRow(query, username)
-	err := row.Scan(&num)
-	return num, err
+	err := row.Scan(&uqn.Id, &uqn.Username, &uqn.QueueId, &uqn.Number)
+	return &uqn, err
 }
 
 func (r *userQueueNumberRepo) existsByUsername(username string) (bool, error) {

@@ -144,5 +144,6 @@ func (s *service) join(username string, queueId int) error {
 }
 
 func (s *service) getQueueNumber(username string) (int, error) {
-	return s.userQueueNumberRepo.getNumber(username)
+	uqn, err := s.userQueueNumberRepo.getByUsername(username)
+	return uqn.Number, err
 }

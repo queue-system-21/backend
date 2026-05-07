@@ -18,7 +18,13 @@ func (r *userQueueNumberRepo) save(tx *sql.Tx, uqn *userQueueNumber) error {
 }
 
 func (r *userQueueNumberRepo) getByUsername(username string) (*userQueueNumber, error) {
-	query := `select uqn.id, uqn.username, uqn.queue_id, uqn.number, q.name_rus, q.name_kaz
+	query := `select 
+				uqn.id, 
+				uqn.username, 
+				uqn.queue_id, 
+				uqn.number - q.current_slot_number, 
+				q.name_rus, 
+				q.name_kaz
 			  from user_queue_number uqn
 				left join queue q on uqn.queue_id = q.id
 			  where uqn.username = $1`

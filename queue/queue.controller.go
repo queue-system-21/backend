@@ -139,3 +139,32 @@ func (h *deleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	utils.SendSuccessMsg(w, "Successfully deleted the queue", 200)
 }
+
+type joinHandler struct {
+	service *service
+}
+
+func newJoinHandler() http.Handler {
+	return &joinHandler{
+		service: newService(),
+	}
+}
+
+func (h *joinHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	pathVars := mux.Vars(r)
+	queueId, err := strconv.Atoi(pathVars["id"])
+	if err != nil {
+		log.Println("Error reading queue id:", err)
+		utils.SendErrMsg(w, "Invalid queue id", 400)
+		return
+	}
+
+	username := r.Context().Value("username").(string)
+	if err := h.service.join(username, queueId); err != nil {
+		log.Println("Error creating user queue number record:", err)
+		utils.SendErrMsg(w, "Failed to join the queue", 500)
+		return
+	}
+
+	utils.SendSuccessMsg(w, "Successfully joined the queue", 200)
+}

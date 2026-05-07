@@ -11,14 +11,16 @@ var errNameRusNotUnique = errors.New("nameRus is not unique")
 var errNameKazNotUnique = errors.New("nameKaz is not unique")
 
 type service struct {
-	repo        *repo
-	userService *user.Service
+	repo                *repo
+	userQueueNumberRepo *userQueueNumberRepo
+	userService         *user.Service
 }
 
 func newService() *service {
 	return &service{
-		repo:        newRepo(),
-		userService: user.NewService(),
+		repo:                newRepo(),
+		userQueueNumberRepo: newUserQueueNumberRepo(),
+		userService:         user.NewService(),
 	}
 }
 
@@ -101,4 +103,12 @@ func (s *service) deleteById(id int) error {
 
 func (s *service) getUserRole(username string) (string, error) {
 	return s.userService.GetRoleByUsername(username)
+}
+
+func (s *service) join(username string, queueId int) error {
+	uqn := userQueueNumber{
+		Username: username,
+		QueueId:  queueId,
+	}
+	return s.userQueueNumberRepo.save(&uqn)
 }

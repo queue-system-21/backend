@@ -44,7 +44,7 @@ func (a *authMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	claims := token.Claims.(jwt.MapClaims)
 	ctx := context.WithValue(r.Context(), "username", claims["username"])
-	ctx = context.WithValue(r.Context(), "role", claims["role"])
+	ctx = context.WithValue(ctx, "role", claims["role"])
 	r = r.WithContext(ctx)
 	a.next.ServeHTTP(w, r)
 }

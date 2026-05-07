@@ -8,12 +8,6 @@ import (
 	"queue/db"
 )
 
-type queue struct {
-	Id      int    `json:"id"`
-	NameRus string `json:"nameRus"`
-	NameKaz string `json:"nameKaz"`
-}
-
 type repo struct{}
 
 func newRepo() *repo {
@@ -21,7 +15,7 @@ func newRepo() *repo {
 }
 
 func (r *repo) getAll() ([]queue, error) {
-	query := "select id, name_rus, name_kaz from queue"
+	query := "select id, name_rus, name_kaz, next_free_slot_number, responsible_user_username from queue"
 	rows, err := db.Db().Query(query)
 	if err != nil {
 		return nil, err
@@ -30,7 +24,8 @@ func (r *repo) getAll() ([]queue, error) {
 	var queues []queue
 	for rows.Next() {
 		var q queue
-		if err = rows.Scan(&q.Id, &q.NameRus, &q.NameKaz); err != nil {
+		err = rows.Scan(&q.Id, &q.NameRus, &q.NameKaz, &q.NextFreeSlotNumber, &q.ResponsibleUserUsername)
+		if err != nil {
 			log.Println("Error in queue.getAll:", err)
 			continue
 		}

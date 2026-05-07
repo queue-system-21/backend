@@ -28,7 +28,20 @@ func (h *getAllHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(queues); err != nil {
+	var dtos []getDto
+	for _, q := range queues {
+		dto := getDto{
+			Id:      q.Id,
+			NameRus: q.NameRus,
+			NameKaz: q.NameKaz,
+		}
+		dtos = append(dtos, dto)
+	}
+	if dtos == nil {
+		dtos = []getDto{}
+	}
+
+	if err := json.NewEncoder(w).Encode(dtos); err != nil {
 		log.Println("Error in queue.list:", err)
 		utils.SendErrMsg(w, "Error getting all queues", 500)
 		return

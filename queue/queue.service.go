@@ -127,3 +127,7 @@ func (s *service) join(username string, queueId int) error {
 func (s *service) getQueueNumber(username string) (int, error) {
 	return s.userQueueNumberRepo.getNumber(username)
 }
+
+func (s *service) next(queueId int) error {
+	return s.repo.incrementNextFreeSlot(queueId)
+}

@@ -203,3 +203,15 @@ func (h *getNumberHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+type nextHandler struct {
+	service *service
+}
+
+func newNextHandler() http.Handler {
+	return &nextHandler{
+		service: newService(),
+	}
+}
+
+func (h *nextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {}

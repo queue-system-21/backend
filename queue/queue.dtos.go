@@ -12,6 +12,8 @@ type createDto struct {
 	ResponsibleUserUsername string `json:"responsibleUserUsername"`
 }
 
-type getNumberDto struct {
-	Number int `json:"number"`
+type infoDto struct {
+	Number       int    `json:"number"`
+	QueueNameRus string `json:"queueNameRus"`
+	QueueNameKaz string `json:"queueNameKaz"`
 }

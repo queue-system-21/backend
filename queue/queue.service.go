@@ -143,7 +143,6 @@ func (s *service) join(username string, queueId int) error {
 	return nil
 }
 
-func (s *service) getQueueNumber(username string) (int, error) {
-	uqn, err := s.userQueueNumberRepo.getByUsername(username)
-	return uqn.Number, err
+func (s *service) getInfo(username string) (*userQueueNumber, error) {
+	return s.userQueueNumberRepo.getByUsername(username)
 }

@@ -13,7 +13,7 @@ func RegisterHandlers(r *mux.Router) {
 	s.Handle("", middlewares.NewRole([]string{"admin"}, newCreateHandler())).Methods(http.MethodPost)
 	s.Handle("/{id:[0-9]+}", middlewares.NewRole([]string{"admin"}, newDeleteHandler())).Methods(http.MethodDelete)
 	s.Handle("/{id:[0-9]+}/join", newJoinHandler()).Methods(http.MethodPost)
-	s.Handle("/number", newGetNumberHandler()).Methods(http.MethodGet)
+	s.Handle("/info", newInfoHandler()).Methods(http.MethodGet)
 	s.Handle("/next", middlewares.NewRole([]string{"receptionist"}, newNextHandler())).Methods(http.MethodPatch)
 
 	s.Use(middlewares.NewAuthMiddleware)

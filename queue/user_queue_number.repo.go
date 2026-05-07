@@ -15,10 +15,20 @@ func (r *userQueueNumberRepo) save(uqn *userQueueNumber) error {
 }
 
 func (r *userQueueNumberRepo) getByUsername(username string) (*userQueueNumber, error) {
-	query := "select id, username, queue_id, number from user_queue_number where username = $1"
+	query := `select uqn.id, uqn.username, uqn.queue_id, uqn.number, q.name_rus, q.name_kaz
+			  from user_queue_number uqn
+				left join queue q on uqn.queue_id = q.id
+			  where uqn.username = $1`
 	var uqn userQueueNumber
 	row := db.Db().QueryRow(query, username)
-	err := row.Scan(&uqn.Id, &uqn.Username, &uqn.QueueId, &uqn.Number)
+	err := row.Scan(
+		&uqn.Id,
+		&uqn.Username,
+		&uqn.QueueId,
+		&uqn.Number,
+		&uqn.queue.NameRus,
+		&uqn.queue.NameKaz,
+	)
 	return &uqn, err
 }
 

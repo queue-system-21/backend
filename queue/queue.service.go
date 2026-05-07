@@ -126,8 +126,15 @@ func (s *service) join(username string, queueId int) error {
 		return errNextFreeCheck
 	}
 
-	if err = s.repo.incrementNextFreeSlot(queueId); err != nil {
+	tx, err := db.Db().Begin()
+	if err != nil {
+		log.Println("Error starting a transaction:", err)
+		return errJoinQueue
+	}
+
+	if err = s.repo.incrementNextFreeSlot(tx, queueId); err != nil {
 		log.Println("Error incrementing queue's next free slot number:", err)
+		tx.Rollback()
 		return errJoinQueue
 	}
 
@@ -136,10 +143,18 @@ func (s *service) join(username string, queueId int) error {
 		QueueId:  queueId,
 		Number:   q.NextFreeSlotNumber,
 	}
-	if err = s.userQueueNumberRepo.save(&uqn); err != nil {
+	if err = s.userQueueNumberRepo.save(tx, &uqn); err != nil {
 		log.Println("Error creating user queue number record:", err)
+		tx.Rollback()
 		return errJoinQueue
 	}
+
+	if err = tx.Commit(); err != nil {
+		log.Println("Error commiting transaction:", err)
+		tx.Rollback()
+		return errJoinQueue
+	}
+
 	return nil
 }
 

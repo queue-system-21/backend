@@ -106,12 +106,12 @@ func (r *repo) deleteById(tx *sql.Tx, id int) (string, error) {
 	return username, err
 }
 
-func (r *repo) incrementNextFreeSlot(queueId int) error {
+func (r *repo) incrementNextFreeSlot(tx *sql.Tx, queueId int) error {
 	query := `update queue
 			  set next_free_slot_number = (select next_free_slot_number + 1
 										   from queue
 										   where id = $1)
 			  where id = $1`
-	_, err := db.Db().Exec(query, queueId)
+	_, err := tx.Exec(query, queueId)
 	return err
 }

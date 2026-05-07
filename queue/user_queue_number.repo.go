@@ -1,6 +1,9 @@
 package queue
 
-import "queue/db"
+import (
+	"database/sql"
+	"queue/db"
+)
 
 type userQueueNumberRepo struct{}
 
@@ -8,9 +11,9 @@ func newUserQueueNumberRepo() *userQueueNumberRepo {
 	return &userQueueNumberRepo{}
 }
 
-func (r *userQueueNumberRepo) save(uqn *userQueueNumber) error {
+func (r *userQueueNumberRepo) save(tx *sql.Tx, uqn *userQueueNumber) error {
 	query := "insert into user_queue_number (username, queue_id, number) values ($1, $2, $3)"
-	_, err := db.Db().Exec(query, uqn.Username, uqn.QueueId, uqn.Number)
+	_, err := tx.Exec(query, uqn.Username, uqn.QueueId, uqn.Number)
 	return err
 }
 

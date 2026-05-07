@@ -37,6 +37,29 @@ func (r *repo) getAll() ([]queue, error) {
 	return queues, nil
 }
 
+func (r *repo) getById(id int) (*queue, error) {
+	query := `select 
+				id, 
+				name_rus, 
+				name_kaz, 
+				next_free_slot_number, 
+				current_slot_number,
+				responsible_user_username 
+			  from queue
+			  where id = $1`
+	row := db.Db().QueryRow(query, id)
+	var q queue
+	err := row.Scan(
+		&q.Id,
+		&q.NameKaz,
+		&q.NameKaz,
+		&q.NextFreeSlotNumber,
+		&q.CurrentSlotNumber,
+		&q.ResponsibleUserUsername,
+	)
+	return &q, err
+}
+
 func (r *repo) create(tx *sql.Tx, q *queue) error {
 	query := `insert into queue (name_rus, name_kaz, responsible_user_username)
 			  values ($1, $2, $3)`
@@ -83,12 +106,12 @@ func (r *repo) deleteById(tx *sql.Tx, id int) (string, error) {
 	return username, err
 }
 
-func (r *repo) incrementNextFreeSlot(id int) error {
+func (r *repo) incrementNextFreeSlot(queueId int) error {
 	query := `update queue
 			  set next_free_slot_number = (select next_free_slot_number + 1
 										   from queue
 										   where id = $1)
 			  where id = $1`
-	_, err := db.Db().Exec(query, id)
+	_, err := db.Db().Exec(query, queueId)
 	return err
 }

@@ -36,3 +36,9 @@ func (r *userQueueNumberRepo) existsByUsername(username string) (bool, error) {
 	err := row.Scan(&exists)
 	return exists, err
 }
+
+func (r *userQueueNumberRepo) deleteByUsername(username string) error {
+	query := "delete from user_queue_number where username = $1"
+	_, err := db.Db().Exec(query, username)
+	return err
+}

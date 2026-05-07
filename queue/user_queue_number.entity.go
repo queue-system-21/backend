@@ -1,6 +1,6 @@
 package queue
 
 type userQueueNumber struct {
-	Id, QueueId int
-	Username    string
+	Id, QueueId, Number int
+	Username            string
 }

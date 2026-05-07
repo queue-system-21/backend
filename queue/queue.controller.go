@@ -169,7 +169,6 @@ func (h *joinHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			utils.SendErrMsg(w, err.Error(), 400)
 			return
 		}
-		log.Println("Error creating user queue number record:", err)
 		utils.SendErrMsg(w, "Failed to join the queue", 500)
 		return
 	}

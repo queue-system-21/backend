@@ -12,6 +12,8 @@ var errNameRusNotUnique = errors.New("nameRus is not unique")
 var errNameKazNotUnique = errors.New("nameKaz is not unique")
 var errUserJoinedQueue = errors.New("User have already joined a queue")
 var errUserQueueCheck = errors.New("Failed to check if the user have already joined a queue")
+var errNextFreeCheck = errors.New("Failed to find next free slot")
+var errJoinQueue = errors.New("Failed to join the queue")
 
 type service struct {
 	repo                *repo
@@ -117,17 +119,30 @@ func (s *service) join(username string, queueId int) error {
 	if exists {
 		return errUserJoinedQueue
 	}
+
+	q, err := s.repo.getById(queueId)
+	if err != nil {
+		log.Println("Error getting queue by id", err)
+		return errNextFreeCheck
+	}
+
+	if err = s.repo.incrementNextFreeSlot(queueId); err != nil {
+		log.Println("Error incrementing queue's next free slot number:", err)
+		return errJoinQueue
+	}
+
 	uqn := userQueueNumber{
 		Username: username,
 		QueueId:  queueId,
+		Number:   q.NextFreeSlotNumber,
 	}
-	return s.userQueueNumberRepo.save(&uqn)
+	if err = s.userQueueNumberRepo.save(&uqn); err != nil {
+		log.Println("Error creating user queue number record:", err)
+		return errJoinQueue
+	}
+	return nil
 }
 
 func (s *service) getQueueNumber(username string) (int, error) {
 	return s.userQueueNumberRepo.getNumber(username)
-}
-
-func (s *service) next(queueId int) error {
-	return s.repo.incrementNextFreeSlot(queueId)
 }

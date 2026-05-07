@@ -115,3 +115,13 @@ func (r *repo) incrementNextFreeSlot(tx *sql.Tx, queueId int) error {
 	_, err := tx.Exec(query, queueId)
 	return err
 }
+
+func (r *repo) incrementCurrentSlot(username string) error {
+	query := `update queue
+			  set current_slot_number = (select current_slot_number + 1
+			  							 from queue
+										 where responsible_user_username = $1)
+			  where responsible_user_username = $1`
+	_, err := db.Db().Exec(query, username)
+	return err
+}

@@ -9,8 +9,8 @@ func newUserQueueNumberRepo() *userQueueNumberRepo {
 }
 
 func (r *userQueueNumberRepo) save(uqn *userQueueNumber) error {
-	query := "insert into user_queue_number (username, queue_id) values ($1, $2)"
-	_, err := db.Db().Exec(query, uqn.Username, uqn.QueueId)
+	query := "insert into user_queue_number (username, queue_id, number) values ($1, $2, $3)"
+	_, err := db.Db().Exec(query, uqn.Username, uqn.QueueId, uqn.Number)
 	return err
 }
 

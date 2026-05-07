@@ -27,5 +27,12 @@ func (r *userQueueNumberRepo) getNumber(username string) (int, error) {
 	row := db.Db().QueryRow(query, username)
 	err := row.Scan(&num)
 	return num, err
+}
 
+func (r *userQueueNumberRepo) existsByUsername(username string) (bool, error) {
+	query := "select exists(select id from user_queue_number where username = $1)"
+	var exists bool
+	row := db.Db().QueryRow(query, username)
+	err := row.Scan(&exists)
+	return exists, err
 }

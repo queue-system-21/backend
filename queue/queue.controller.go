@@ -161,6 +161,14 @@ func (h *joinHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	username := r.Context().Value("username").(string)
 	if err := h.service.join(username, queueId); err != nil {
+		if err == errUserQueueCheck {
+			utils.SendErrMsg(w, err.Error(), 500)
+			return
+		}
+		if err == errUserJoinedQueue {
+			utils.SendErrMsg(w, err.Error(), 400)
+			return
+		}
 		log.Println("Error creating user queue number record:", err)
 		utils.SendErrMsg(w, "Failed to join the queue", 500)
 		return

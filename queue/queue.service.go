@@ -2,6 +2,7 @@ package queue
 
 import (
 	"errors"
+	"log"
 	"queue/db"
 	"queue/user"
 )
@@ -9,6 +10,8 @@ import (
 var errUserBusy = errors.New("You cannot assign this user for this queue")
 var errNameRusNotUnique = errors.New("nameRus is not unique")
 var errNameKazNotUnique = errors.New("nameKaz is not unique")
+var errUserJoinedQueue = errors.New("User have already joined a queue")
+var errUserQueueCheck = errors.New("Failed to check if the user have already joined a queue")
 
 type service struct {
 	repo                *repo
@@ -106,6 +109,14 @@ func (s *service) getUserRole(username string) (string, error) {
 }
 
 func (s *service) join(username string, queueId int) error {
+	exists, err := s.userQueueNumberRepo.existsByUsername(username)
+	if err != nil {
+		log.Println("Error checking if user have already joined a queue:", err)
+		return errUserQueueCheck
+	}
+	if exists {
+		return errUserJoinedQueue
+	}
 	uqn := userQueueNumber{
 		Username: username,
 		QueueId:  queueId,

@@ -173,3 +173,7 @@ func (s *service) next(username string) error {
 	}
 	return s.repo.incrementCurrentSlot(username)
 }
+
+func (s *service) deleteUqnByUsername(username string) error {
+	return s.userQueueNumberRepo.deleteByUsername(username)
+}

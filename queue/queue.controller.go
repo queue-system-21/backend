@@ -190,8 +190,18 @@ func (h *infoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	username := r.Context().Value("username").(string)
 	uqn, err := h.service.getInfo(username)
 	if err != nil {
-		log.Println("Error getting queue number:", err)
-		utils.SendErrMsg(w, "Failed to get queue number", 500)
+		log.Println("Error getting queue info:", err)
+		utils.SendErrMsg(w, "Failed to get queue info", 500)
+		return
+	}
+
+	if uqn.Number < 1 {
+		if err = h.service.deleteUqnByUsername(uqn.Username); err != nil {
+			log.Println("Error deleting uqn:", err)
+			utils.SendErrMsg(w, "Failed to get queue info", 500)
+			return
+		}
+		utils.SendSuccessMsg(w, "You are not in any queue", 200)
 		return
 	}
 
@@ -201,7 +211,7 @@ func (h *infoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		QueueNameKaz: uqn.queue.NameKaz,
 	}
 	if err := json.NewEncoder(w).Encode(dto); err != nil {
-		log.Println("Error encoding number:", err)
+		log.Println("Error encoding info:", err)
 		utils.SendErrMsg(w, "Failed to encode response", 500)
 		return
 	}

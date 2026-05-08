@@ -20,7 +20,9 @@ func main() {
 	queue.RegisterHandlers(r)
 	port := os.Getenv("PORT")
 	log.Println("Starting the server on port:", port)
-	http.ListenAndServe(":"+port, r)
+	if err := http.ListenAndServe(":"+port, r); err != nil {
+		log.Println("Error starting the server:", err)
+	}
 }
 
 func registerHealthHandler(r *mux.Router) {

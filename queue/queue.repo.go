@@ -38,6 +38,14 @@ func (r *repo) getAll() ([]queue, error) {
 }
 
 func (r *repo) getById(id int) (*queue, error) {
+	return r.getBy("id", id)
+}
+
+func (r *repo) getByUsername(username string) (*queue, error) {
+	return r.getBy("responsible_user_username", username)
+}
+
+func (r *repo) getBy(column string, value any) (*queue, error) {
 	query := `select 
 				id, 
 				name_rus, 
@@ -46,8 +54,9 @@ func (r *repo) getById(id int) (*queue, error) {
 				current_slot_number,
 				responsible_user_username 
 			  from queue
-			  where id = $1`
-	row := db.Db().QueryRow(query, id)
+			  where %s = $1`
+	query = fmt.Sprintf(query, column)
+	row := db.Db().QueryRow(query, value)
 	var q queue
 	err := row.Scan(
 		&q.Id,

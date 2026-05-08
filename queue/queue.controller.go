@@ -220,6 +220,10 @@ func newNextHandler() http.Handler {
 func (h *nextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	username := r.Context().Value("username").(string)
 	if err := h.service.next(username); err != nil {
+		if err == errQueueEmpty {
+			utils.SendErrMsg(w, "Queue is already empty", 400)
+			return
+		}
 		log.Println("Error incrementing current slot number:", err)
 		utils.SendErrMsg(w, "Failed to invite next person", 500)
 		return

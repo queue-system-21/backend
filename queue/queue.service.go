@@ -14,6 +14,7 @@ var errUserJoinedQueue = errors.New("User have already joined a queue")
 var errUserQueueCheck = errors.New("Failed to check if the user have already joined a queue")
 var errNextFreeCheck = errors.New("Failed to find next free slot")
 var errJoinQueue = errors.New("Failed to join the queue")
+var errQueueEmpty = errors.New("Queue is empty")
 
 type service struct {
 	repo                *repo
@@ -163,5 +164,12 @@ func (s *service) getInfo(username string) (*userQueueNumber, error) {
 }
 
 func (s *service) next(username string) error {
+	q, err := s.repo.getByUsername(username)
+	if err != nil {
+		return err
+	}
+	if q.CurrentSlotNumber >= q.NextFreeSlotNumber-1 {
+		return errQueueEmpty
+	}
 	return s.repo.incrementCurrentSlot(username)
 }

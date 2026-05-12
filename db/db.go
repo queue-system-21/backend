@@ -21,6 +21,7 @@ func Db() *sql.DB {
 }
 
 func connect() {
+	host := os.Getenv("DB_HOST")
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 	database := os.Getenv("DB_NAME")
@@ -29,7 +30,7 @@ func connect() {
 		log.Fatal(err)
 	}
 	sslMode := os.Getenv("DB_SSL_MODE")
-	connStr := fmt.Sprintf("user=%s password=%s database=%s port=%d sslmode=%s", user, password, database, port, sslMode)
+	connStr := fmt.Sprintf("host=%s user=%s password=%s database=%s port=%d sslmode=%s", host, user, password, database, port, sslMode)
 	if db, err = sql.Open("postgres", connStr); err != nil {
 		log.Fatal(err)
 	}

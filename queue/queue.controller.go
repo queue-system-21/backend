@@ -195,7 +195,7 @@ func (h *infoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if uqn.Number < 1 {
+	if uqn.Number < 0 {
 		if err = h.service.deleteUqnByUsername(uqn.Username); err != nil {
 			log.Println("Error deleting uqn:", err)
 			utils.SendErrMsg(w, "Failed to get queue info", 500)
